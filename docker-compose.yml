@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: grid07_postgres
+    environment:
+      POSTGRES_DB: grid07db
+      POSTGRES_USER: grid07user
+      POSTGRES_PASSWORD: grid07pass
+    ports:
+      - "5432:5432"
+    restart: always
+
+  redis:
+    image: redis:7
+    container_name: grid07_redis
+    ports:
+      - "6379:6379"
