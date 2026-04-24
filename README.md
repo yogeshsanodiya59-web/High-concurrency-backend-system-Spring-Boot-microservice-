@@ -90,14 +90,18 @@ Building this system was a great learning experience, especially dealing with di
 Initially, I thought of doing a simple GET count from Redis, checking it in Java, and then doing a SET. But I realized that under high concurrency (like 200 bots hitting at once), two requests might read the same count simultaneously and both would proceed, breaking the 100-comment limit.
 
 The Fix: I switched to using Redis's atomic INCR operation. Since Redis is single-threaded, it ensures every increment is handled one-by-one. I then checked the result of that increment in Java. This guaranteed that the 101st request would always be blocked, no matter how fast it came.
+
 2. Local vs Docker Redis Collision
 During testing, I noticed my guardrails weren't resetting even after I flushed the Docker Redis. It was quite a head-scratcher!
 
 The Fix: After some debugging with netstat and tasklist, I discovered a native Windows Redis service was running on the same port as my Docker container. My Spring Boot app was silently connecting to the native one. Once I identified this "ghost" state, I standardized my environment and ensured the app was talking to the right instance.
+
+
 3. Designing a Bulletproof Concurrency Test
 Running a concurrency test multiple times on the same post was causing "false failures" because of leftover data in Redis from previous runs.
 
 The Fix: Instead of manually clearing Redis every time, I upgraded my spam_test.py script to automatically provision a completely fresh Post via the API for every test run. This made the test "idempotent" and much more reliable for evaluation.
+
 4. Balancing User Experience with Notification Spam
 Implementing the 15-minute notification window was tricky because I had to handle both an active cooldown and a growing list of pending notifications without losing any data.
 
